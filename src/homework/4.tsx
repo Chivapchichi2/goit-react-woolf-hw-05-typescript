@@ -1,41 +1,49 @@
 import React, { createContext, useMemo, useState, useContext } from "react";
 import noop from "lodash/noop";
 
-type MenuIds = "first" | "second" | "last";
+type MenuIds = "first" | "second" | "last" | "";
 type Menu = { id: MenuIds; title: string };
 
-// Додати тип Menu Selected
+type SelectedMenu = {
+  id: MenuIds;
+};
 
-const MenuSelectedContext = createContext<MenuSelected>({
-  selectedMenu: {},
-});
+type MenuSelected = {
+  selectedMenu: SelectedMenu;
+};
 
-// Додайте тип MenuAction
+type MenuAction = {
+  onSelectedMenu: (selectedMenu: SelectedMenu) => void;
+};
 
-const MenuActionContext = createContext<MenuAction>({
+const MenuSelectedContext: React.Context<MenuSelected> =
+  createContext<MenuSelected>({
+    selectedMenu: { id: "" },
+  });
+
+const MenuActionContext: React.Context<MenuAction> = createContext<MenuAction>({
   onSelectedMenu: noop,
 });
 
 type PropsProvider = {
-  children; // Додати тип для children
+  children: React.ReactNode;
 };
 
 function MenuProvider({ children }: PropsProvider) {
-  // Додати тип для SelectedMenu він повинен містити { id }
-  const [selectedMenu, setSelectedMenu] = useState<SelectedMenu>({});
+  const [selectedMenu, setSelectedMenu] = useState<SelectedMenu>({ id: "" });
 
   const menuContextAction = useMemo(
     () => ({
       onSelectedMenu: setSelectedMenu,
     }),
-    []
+    [],
   );
 
   const menuContextSelected = useMemo(
     () => ({
       selectedMenu,
     }),
-    [selectedMenu]
+    [selectedMenu],
   );
 
   return (
@@ -48,7 +56,7 @@ function MenuProvider({ children }: PropsProvider) {
 }
 
 type PropsMenu = {
-  menus; // Додайте вірний тип для меню
+  menus: Menu[];
 };
 
 function MenuComponent({ menus }: PropsMenu) {
@@ -57,7 +65,7 @@ function MenuComponent({ menus }: PropsMenu) {
 
   return (
     <>
-      {menus.map((menu) => (
+      {menus.map((menu: Menu) => (
         <div key={menu.id} onClick={() => onSelectedMenu({ id: menu.id })}>
           {menu.title}{" "}
           {selectedMenu.id === menu.id ? "Selected" : "Not selected"}
@@ -67,7 +75,7 @@ function MenuComponent({ menus }: PropsMenu) {
   );
 }
 
-export function ComponentApp() {
+export function ComponentApp(): React.ReactElement {
   const menus: Menu[] = [
     {
       id: "first",
